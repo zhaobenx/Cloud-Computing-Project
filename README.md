@@ -6,7 +6,7 @@ Compare Hadoop MapReduce and Spark in several aspects in terms of solving big da
 
 ## Motivations
 
-​    Hadoop is the reliable storage and processing of big data over the years. However, MapReduce has the following limitations that make it difficult to use. 
+Hadoop is the reliable storage and processing of big data over the years. However, MapReduce has the following limitations that make it difficult to use. 
 
 -  A job has only two phases, map and reduce. Complex calculation requires a lot of job and the dependencies between jobs are managed by the developers themselves.
 - Reduce task needs to wait for all map tasks to be completed before starting

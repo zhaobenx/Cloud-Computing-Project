@@ -1,17 +1,5 @@
 # Report 
 
-## Motivation
-
-Hadoop is the reliable storage and processing of big data over the years. However, MapReduce has the following limitations that make it difficult to use. 
-
--  A job has only two phases, map and reduce. Complex calculation requires a lot of job and the dependencies between jobs are managed by the developers themselves.
--  Reduce task needs to wait for all map tasks to be completed before starting
--  High time delay and only applies to batch data processing. For interactive data processing and real-time data processing, there is insufficient support.
-
-Apache Spark is an emerging big data processing engine. The main feature is to 
-
-provide a clustered distributed memory abstraction (RDD: Resilient Distributed Dataset) to support applications that require a working set. Using Spark instead of mapreduce is the development trend of big data processing platform. 
-
 ## AWS EC2 build Hadoop Cluster
 
 ### Overview
@@ -35,6 +23,8 @@ Then select a instance type, you can select any one, here we choose the free `t2
 ![instance type](report.assets/image-20200515230953410.png)
 
 In the instance configure step, leave all the setting to default value, except: `Number of instances`, here we set to 3 (1 master + 2 slaves), you can enter a larger number if you want to have a bigger cluster; and set the `Subnet` to any one to ensure all of the instances belongs to the same subnet.
+
+*Number of instances means that you will create 3 separated instances with the same configuration, not 3 instance share the same CPU and memory.*
 
 ![instance configure](report.assets/image-20200515231134453.png)
 
@@ -80,18 +70,11 @@ ping slave1 -c 4
 ping slave2 -c 4
 ```
 
-Next step is generating the ssh key from master, and then send the public key to the slaves, so that master can access slaves without password. After generated the public key, copy the authorized_keys file to two slaves in the same directory (~/.ssh/authorized_keys).
-
-```bash
-ssh-keygen -t rsa                                     
-cat .ssh/id_rsa.pub >> .ssh/authorized_keys 
-```
-
-After that, try to ssh to two slaves from master, if successful, meaning the network is configured correctly.
-
 ### Install Hadoop
 
 Scripts use below can be get by [install_hadoop.sh](https://github.com/zhaobenx/Cloud-Computing-Project/blob/master/scirpt/install_hadoop.sh).
+
+#### Setup user
 
 First login to the master instance by ssh. Then create `hadoop` user and add it to `su `group. Here we need to remember the password set for the `hadoop `user.
 
@@ -101,7 +84,24 @@ sudo passwd hadoop  			        # set the password
 sudo usermod -aG wheel hadoop			# add hadoop to sudoer
 ```
 
-Then type `su hadoop`, enter the password you have set, to switch to the `hadoop` user. Next step is to install java(with JDK) and Hadoop. One import thing is to install java 8, as java 11 is not compatible with Hadoop,  you can run the Hadoop with java 11 but with some unexcepted errors.
+Then type `su hadoop`, enter the password you have set, to switch to the `hadoop` user. 
+
+Next step is generating the ssh key from master, and then send the public key to the slaves, so that master can access slaves without password. After generated the public key, copy the authorized_keys file to two slaves in the same directory (`~/.ssh/authorized_keys`, and in this project `~` should be `hadoop` user).
+
+```bash
+ssh-keygen -t rsa                                     
+cat .ssh/id_rsa.pub >> .ssh/authorized_keys 
+```
+
+After that, try to ssh to two slaves from master, if successful, meaning the network is configured correctly.
+
+**Brief explanation of  how does the key pair works:** One key pair includes two part, public key and secret key. Secret key should be stored secretly(in `~/.ssh/id_rsa`), and public key can be shared to other (stored in others `.ssh/authorized_keys`). One with secret key can log to the machine with same public key pair without password. Usually there is only one secret key store in each machine and can be many public key.
+
+So in this project, we will use two key pairs, one `k1.secret`, `k1.public` and `k2.secret`, `k2.public`, k1 is we have set in the launch EC2 steps, the `k1.secret` is stored locally, `k1.public` is stored on the three remote machine, so you can log to those machine by ssh.  `k2.secret`  is stored on Master machine, and `k2.public` is stored on the two slaves machine, so that the Master can access these two machine and control them.
+
+#### Install JDK and Hadoop
+
+Next step is to install java(with JDK) and Hadoop. One import thing is to install java 8, as java 11 is not compatible with Hadoop,  you can run the Hadoop with java 11 but with some unexcepted errors.
 
 ```bash
 wget http://mirror.cc.columbia.edu/pub/software/apache/hadoop/common/hadoop-3.2.1/hadoop-3.2.1.tar.gz
@@ -114,6 +114,8 @@ echo 'export JAVA_HOME=$(readlink -f /usr/bin/java | sed "s:bin/java::")'>>/usr/
 ```
 
 Repeat this steps on two slaves machine(add `hadoop` user and install java and Hadoop).
+
+#### Configure the Hadoop
 
 Next step is to change the configure files for Hadoop,  there are five files need to be modified:  `workers`,`core-site.xml`,`hdfs-site.xml`,`mapred-site.xml`,`yarn-site.xml`. Important: in Hadoop 3.0, `slaves` files is renamed to `workers`. You can get the config file from [configure files](https://github.com/zhaobenx/Cloud-Computing-Project/tree/master/config).
 
@@ -246,7 +248,7 @@ hdfs dfsadmin -report
 
 to get the report of the cluster, if everything is right, you should get `Live datanodes (2)`in the result.
 
-## AWS EC2 build Hadoop Cluster
+## AWS EC2 build Spark Cluster
 
 ### Setup Hadoop
 
@@ -293,7 +295,7 @@ start-master.sh
 start-slaves.sh  
 ```
 
-### Stop the Cluster
+#### Stop the Cluster
 
 ```bash
 stop-slaves.sh

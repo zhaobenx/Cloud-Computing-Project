@@ -1,5 +1,7 @@
 # Final Project  Data Center and Cloud Computing（ECE-GY 6363）
 
+Steps of how to setup Hadoop and Spark clusters on AWS can be found in `report/` folder.
+
 ## Research topic
 
 Compare Hadoop MapReduce and Spark in several aspects in terms of solving big data problems

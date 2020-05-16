@@ -17,5 +17,5 @@ mv spark-env.sh.template spark-env.sh
 echo "
 export SPARK_DIST_CLASSPATH=\$(/usr/local/hadoop/bin/hadoop classpath)
 export HADOOP_CONF_DIR=/usr/local/hadoop/etc/hadoop
-export SPARK_MASTER_IP=Master   # 注意这里填的是Master节点的私有IP 
+export SPARK_MASTER_IP=Master  
 export JAVA_HOME=$(readlink -f /usr/bin/java | sed \"s:bin/java::\")" >> spark-env.sh

@@ -9,6 +9,6 @@ sudo yum install java-8-openjdk-devel
 echo 'export JAVA_HOME=$(readlink -f /usr/bin/java | sed "s:bin/java::")'>>/usr/local/hadoop/etc/hadoop/hadoop-env.sh
 
 ###
-sudo useradd -m hadoop -s /bin/bash   # 增加 hadoop用户
-sudo passwd hadoop  			        # 设置密码，需要输入两次
+sudo useradd -m hadoop -s /bin/bash   # add hadoop user
+sudo passwd hadoop  			        # input the password twice
 sudo usermod -aG wheel hadoop
